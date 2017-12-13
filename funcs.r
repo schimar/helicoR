@@ -1,3 +1,5 @@
+
+
 error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
 if(length(x) != length(y) | length(y) !=length(lower) | length(lower) != length(upper))
 stop("vectors must be same length")
@@ -47,10 +49,22 @@ getPquant <- function(pDiff, quantil = 0.98){
 	names(quantPls) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
 	return(quantPls)
 }
+
+
+getFquant <- function(fst, quantil = 0.98){
+	quantFls <- list()
+	for(i in 1:length(fst)){
+			dat <- fst[[i]]$WEIR_AND_COCKERHAM
+			quant <- quantile(dat, prob= quantil, na.rm= T, type= 8)
+			quantFls[[i]] <- which(dat >= quant)
+	}
+	names(quantFls) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
+	return(quantFls)
+}
+
 is.integer0 <- function(x){
 	is.integer(x) && length(x) == 0L
 }
-
 
 getPPS <- function(ps, specX1, specX2){
 	#ps <- gChr[selXX,]
@@ -113,7 +127,7 @@ getQldPallChr <- function(chrls, pQls, pops, tChr = 2){
 	ppn1 <- pn[-iNvar1, specX1]
 	ppn2 <- pn[-iNvar2, specX2]
 	snx1 <- sample(nrow(ppn1), nps1, replace= F)
-	snx2 <- sample(nrow(ppn2), nps1, replace= F)
+	snx2 <- sample(nrow(ppn2), nps2, replace= F)
 
 	pN1 <- ppn1[snx1,]
 	pN2 <- ppn2[snx2,]
@@ -321,4 +335,41 @@ plotPi <- function(x, tchr){
 	plot(dat$pi_pach, type= 'l', ylab= expression(pi), xlab= 'pach', cex.lab= 1.4, cex= 1.3, ylim= c(0,1))
 	#abline(h= 0, lty= 3)
 }
+
+getIndyP <- function(dat, distro= 'asymptotic', tstat= 'maximum', alt= 'less'){
+	pops <- names(dat)
+	s1 <- dat[[1]]$LDmat
+	s2 <- dat[[2]]$LDmat
+	n1 <- dat[[1]]$LDmatN
+	n2 <- dat[[2]]$LDmatN
+	#
+	tst1 <- independence_test(log(s1) ~ log(n1), distribution= distro, teststat= tstat, alternative= alt)
+	tst2 <- independence_test(log(s2) ~ log(n2), distribution= distro, teststat= tstat, alternative= alt)
+
+	p1 <- pvalue(tst1)
+	p2 <- pvalue(tst2)
+	out <- list(p1, p2)
+	names(out) <- pops
+	return(out)
+}
+
+
+hist_logX <- function(dat, fname, ylim= "", breaks= 100){
+	#yLim <- c(1,5e+05)
+	dat <- cgmr2		
+	pops <- names(dat)	
+	pdf(fname)		#'cgmr2log2.pdf')
+	par(mfrow= c(4,3))		#, mar=c(4.0,4.0,4.0,4.0) + 0.2, mgp= c(3,1,0))		#oma=c(4.5,4.5,4.5,4.5), 
+	for(i in 1:2){
+		#pops <- names(dat)
+		hist(log(dat[[i]][[1]]), breaks= breaks, main= paste(pops[i], "selected sites"), xlab= expression(paste('log r'^'2')))
+		hist(log(dat[[i]][[2]]), breaks= breaks, main= paste(pops[i], "neutral sites"), xlab= expression(paste('log r'^'2')))
+		hist(log(dat[[i]][[3]]), breaks= breaks, main= paste(pops[i], "selected vs. neutral sites"), xlab= expression(paste('log r'^'2')))
+		hist(log(dat[[i]][[4]]), breaks= breaks, main= paste(pops[i], "selected sites w/ 'other' s"), xlab= expression(paste('log r'^'2')))
+		hist(log(dat[[i]][[5]]), breaks= breaks, main= paste(pops[i], "neutral sites w/ 'other' n"), xlab= expression(paste('log r'^'2')))
+		hist(log(dat[[i]][[6]]), breaks= breaks, main= paste(pops[i], "selected w/ 'other' n sites"), xlab= expression(paste('log r'^'2')))
+	}
+	dev.off()
+}
+
 
