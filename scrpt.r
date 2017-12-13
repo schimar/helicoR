@@ -16,9 +16,10 @@ cs <- cs[order(cs$V1),]
 names(cs) <- c('chrom', 'nVar', 'dpMean', 'dpSD', 'mqMean', 'mqSD')
 
 
-scafs <- read.table('hmel2.5.30f4nScafPerChrom.txt', header= F)
+scafs <- read.table('../hmel2.5.30f4nScafPerChrom.txt', header= F)
 
-
+sTable1 <- cbind(cs, scafs[,2])
+colnames(sTable1) <- c(colnames(cs), "nScafs")
 
 # barplots
 
@@ -225,7 +226,7 @@ vioplot(abs(dat$cgal_mros), abs(dat$pach_mros), abs(dat$cgal_pach))
 
 pQls <- list()
 for(i in 1:length(pDifls)){
-	pQls[[i]] <- getPquant(pDifls[[i]], 0.99)
+	pQls[[i]] <- getPquant(pDifls[[i]], 0.98)
 }
 
 
@@ -309,33 +310,33 @@ error.bar(barPi, mean_pis, sd_pis) #1.96*cs$dpSD/10)
 
 #########################################################
 
-##    fst   (vcftools)
+##    fst   (vcftools)  windows
 
 
-lsfst <- system("ls pgStats/fst/singleLoc/", intern= T)
-fls.fst <- lsfst[grep("weir.fst", lsfst)]#[c(1:14, 16)]
-
-
-fstNames <- unlist(strsplit(fls.fst, '.windowed.weir.fst'))
-for(i in 1:length(fls.fst)){
-    #oname = paste(estname[i], "est", sep= "")
-	fname <- paste('pgStats/fst/', fls.fst[i], sep= '')
-	print(fname)
-	obj <- read.table(fname, sep= '\t', header= T)
-	obj$WEIGHTED_FST[which(obj$WEIGHTED_FST < 0)] <- NA
-    assign(fstNames[i], obj)	#read.table(fname, sep= '\t', header= T))
-}
-
-
-cgal_mros <- list(cgal_mrosChr2, cgal_mrosChr7, cgal_mrosChr10, cgal_mrosChr18, cgal_mrosChr21) 
-names(cgal_mros) <- chromnames
-pach_mros <- list(pach_mrosChr2, pach_mrosChr7, pach_mrosChr10, pach_mrosChr18, pach_mrosChr21) 
-names(pach_mros) <- chromnames
-cgal_pach <- list(cgal_pachChr2, cgal_pachChr7, cgal_pachChr10, cgal_pachChr18, cgal_pachChr21) 
-names(cgal_pach) <- chromnames
-
-fst <- list(cgal_mros, pach_mros, cgal_pach)
-names(fst) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
+#lsfst <- system("ls pgStats/fst/singleLoc/", intern= T)
+#fls.fst <- lsfst[grep("weir.fst", lsfst)]#[c(1:14, 16)]
+#
+#
+#fstNames <- unlist(strsplit(fls.fst, '.windowed.weir.fst'))
+#for(i in 1:length(fls.fst)){
+#    #oname = paste(estname[i], "est", sep= "")
+#	fname <- paste('pgStats/fst/singleLoc/', fls.fst[i], sep= '')
+#	print(fname)
+#	obj <- read.table(fname, sep= '\t', header= T)
+#	obj$WEIGHTED_FST[which(obj$WEIGHTED_FST < 0)] <- NA
+#    assign(fstNames[i], obj)	#read.table(fname, sep= '\t', header= T))
+#}
+#
+#
+#cgal_mros <- list(cgal_mrosChr2, cgal_mrosChr7, cgal_mrosChr10, cgal_mrosChr18, cgal_mrosChr21) 
+#names(cgal_mros) <- chromnames
+#pach_mros <- list(pach_mrosChr2, pach_mrosChr7, pach_mrosChr10, pach_mrosChr18, pach_mrosChr21) 
+#names(pach_mros) <- chromnames
+#cgal_pach <- list(cgal_pachChr2, cgal_pachChr7, cgal_pachChr10, cgal_pachChr18, cgal_pachChr21) 
+#names(cgal_pach) <- chromnames
+#
+#fst <- list(cgal_mros, pach_mros, cgal_pach)
+#names(fst) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
 
 ## plot fst chrom per spec
 
@@ -352,8 +353,8 @@ sd_fst <- matrix(nrow= 5, ncol= 3, dimnames= list(chromnames, names(fst)))
 for(i in 1:length(fst)){
 	currC <- fst[[i]]
 	for(j in 1:5){
-		mean_fst[j, i]  <- mean(fst[[i]][[j]]$WEIGHTED_FST, na.rm= T)
-		sd_fst[j, i] <- sd(fst[[i]][[j]]$WEIGHTED_FST, na.rm= T)
+		mean_fst[j, i]  <- mean(fst[[i]][[j]]$WEIR_AND_COCKERHAM_FST, na.rm= T)
+		sd_fst[j, i] <- sd(fst[[i]][[j]]$WEIR_AND_COCKERHAM_FST, na.rm= T)
 	}
 }
 
@@ -363,10 +364,19 @@ error.bar(barFst, mean_fst, sd_fst) #1.96*cs$dpSD/10)
 
 
 
+# now a full table for SI table 2 
+fstM <- matrix(nrow=5, ncol= 6, dimnames= list(rownames(mean_fst), paste0(c("cgmrMean", "cgmrSD", "pamrMean", "pamrSD", "cgpaMean", "cgpaSD"), "Fst")))
+for(i in 1:3){
+	j <- i*2
+	fstM[,j-1] <- mean_fst[,i]
+	fstM[,j] <- sd_fst[,i]
+}
+
+
 ####     per locus fst 
 
 
-lsfst <- system("ls pgStats/fst/singleLoc/", intern= T)
+sfst <- system("ls pgStats/fst/singleLoc/", intern= T)
 fls.fst <- lsfst[grep("weir.fst", lsfst)]#[c(1:14, 16)]
 
 
@@ -393,38 +403,57 @@ names(fst) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
 
 ##
 
-
-
-
-uQuant <- function(dat, thresh= 2){
-	vec <- dat$WEIR_AND_COCKERHAM_FST
-	#dat <- tajDat$TajimaD
-	lowerq = quantile(vec, na.rm= T)[2]
-	upperq = quantile(vec, na.rm= T)[4]
-	iqr = upperq - lowerq #Or use IQR(data)
-	#Compute the bounds for an outlier, given thresh (1.5, 3,...)
-	upper = (iqr * thresh) + upperq
-	lower = lowerq - (iqr * thresh)
-	#return(dat[which(vec < lower | vec > upper),])		# or only return indices? (which())
-	return(which(vec < lower | vec > upper))	
-}
+#uQuant <- function(dat, thresh= 2){
+#	vec <- dat$WEIR_AND_COCKERHAM_FST
+#	#dat <- tajDat$TajimaD
+#	lowerq = quantile(vec, na.rm= T)[2]
+#	upperq = quantile(vec, na.rm= T)[4]
+#	iqr = upperq - lowerq #Or use IQR(data)
+#	#Compute the bounds for an outlier, given thresh (1.5, 3,...)
+#	upper = (iqr * thresh) + upperq
+#	lower = lowerq - (iqr * thresh)
+#	#return(dat[which(vec < lower | vec > upper),])		# or only return indices? (which())
+#	return(which(vec < lower | vec > upper))	
+#}
 
 #n <- 0.05
 #subset(data, V2 > quantile(V2, prob = 1 - n))
 
 
+
+fstChr2 <- list(cgal_mrosChr2, pach_mrosChr2, cgal_pachChr2)
+names(fstChr2) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
+fstChr7 <- list(cgal_mrosChr7, pach_mrosChr7, cgal_pachChr7)
+names(fstChr7) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
+fstChr10 <- list(cgal_mrosChr10, pach_mrosChr10, cgal_pachChr10)
+names(fstChr10) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
+fstChr18 <- list(cgal_mrosChr18, pach_mrosChr18, cgal_pachChr18)
+names(fstChr18) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
+fstChr21 <- list(cgal_mrosChr21, pach_mrosChr21, cgal_pachChr21)
+names(fstChr21) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
+
+fstls <- list(fstChr2, fstChr7, fstChr10, fstChr18, fstChr21) 
+
+
+# fst outliers 
+
+fstQls <- list()
+for(i in 1:length(fstls)){
+	fstQls[[i]] <- getFquant(fstls[[i]], 0.99)
+}
+
+
+
+# get the number of outliers for each specBYspec   (SI table 2)
+fstOutM <- matrix(nrow= 5, ncol= 3, dimnames= list(chromnames, paste0(names(fstQls[[1]]), "Fst")))
+for(i in 1:3){
+	fstOutM[,i] <- unlist(lapply(lapply(fstQls, '[[', 1), length))
+}
+
+
+
 # get the xth quantile (< outlier)
 
-getFquant <- function(fst, quantil = 0.98){
-	dat <- fst@WEIR_AND_COCKERHAM_FST	
-	quantPls <- list()
-	for(i in 1:dim(fst)[2]){
-		quant <- quantile(dat[,i], prob= quantil)
-		quantPls[[i]] <- which(dat[,i] > quant)
-	}
-	names(quantPls) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
-	return(quantPls)
-}
 
 pQls <- list()
 for(i in 1:length(pDifls)){
@@ -432,9 +461,13 @@ for(i in 1:length(pDifls)){
 }
 
 
+pOutM <- matrix(nrow= 5, ncol= 3, dimnames= list(chromnames, paste0(names(pQls[[1]]), "afDiffs")))
+for(i in 1:3){
+	pOutM[,i] <- unlist(lapply(lapply(pQls, '[[', 1), length))
+}
 
-
-
+p_fst_outN <- cbind(pOutM[,1], fstOutM[,1])
+colnames(p_fst_outN) <- c('afDiffs', 'Fst')
 #
 getQld2 <- function(x, g, pops, n= 0.05){
 	spec1 <- pops[1]
@@ -529,9 +562,6 @@ sn2 <- getQldPall(pDiff, chr2, c('cgal', 'mros'), qtt= 0.99)
 
 
 ##############################################
-
-
-
 
 
 sn2 <- getQldPallChr(chrls= chrl, pQls= pQls, tChr= 2, pops= c('cgal', 'mros'))
@@ -729,6 +759,14 @@ plotVioChr(tajDs, 2)
 ###
 par(mfrow= c(3,1), oma=c(4.5,4.5,4.5,4.5), mar=c(4.0,4.0,4.0,4.0) + 0.2, mgp= c(3,1,0))
 plotVioSpec(tajDs, 'cgal')
+
+# now a full table for SI table 2   (with fstM) 
+tajDM <- matrix(nrow=5, ncol= 6, dimnames= list(rownames(mean_tajD), paste0(c("cgmrMean", "cgmrSD", "pamrMean", "pamrSD", "cgpaMean", "cgpaSD"), "TajD")))
+for(i in 1:3){
+	j <- i*2
+	tajDM[,j-1] <- mean_tajD[,i]
+	tajDM[,j] <- sd_tajD[,i]
+}
 
 
 
