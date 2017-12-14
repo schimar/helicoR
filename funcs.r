@@ -356,7 +356,6 @@ getIndyP <- function(dat, distro= 'asymptotic', tstat= 'maximum', alt= 'less'){
 
 hist_logX <- function(dat, fname, ylim= "", breaks= 100){
 	#yLim <- c(1,5e+05)
-	dat <- cgmr2		
 	pops <- names(dat)	
 	pdf(fname)		#'cgmr2log2.pdf')
 	par(mfrow= c(4,3))		#, mar=c(4.0,4.0,4.0,4.0) + 0.2, mgp= c(3,1,0))		#oma=c(4.5,4.5,4.5,4.5), 
