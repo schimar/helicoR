@@ -1,4 +1,4 @@
-
+library(coin)
 
 error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
 if(length(x) != length(y) | length(y) !=length(lower) | length(lower) != length(upper))
