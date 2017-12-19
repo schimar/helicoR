@@ -8,7 +8,7 @@ arrows(x,y+upper, x, y-lower, angle=90, code=3, length=length, ...)
 
 
 pML <- function(chrList, IDs){
-	## population allele freqs., simple ML estimate
+	## population allele freqs, simple ML estimate
 	outlst <- list()
 	for(i in 1:length(chrList)){
 		G <- as.matrix(chrList[[i]])
@@ -145,6 +145,8 @@ getQldPallChr <- function(chrls, pQls, pops, tChr = 2){
 	  	selloc2 <- pps2[i,]
 		mSN2[i,] <- cor(t(pN2), as.numeric(selloc2))^2
 	}
+	mSN1 <- as.numeric(mSN1)[seq(2, length(mSN1)-nps1, 2)]
+	mSN2 <- as.numeric(mSN2)[seq(2, length(mSN2)-nps2, 2)]
 	#### diff chroms (s-s)
 	gChrOthers <- chrl[-chrX]
 	pQchrXs <- pQls[-chrX]		# indices for all "other" chroms, with all 3 specPairs
@@ -167,10 +169,15 @@ getQldPallChr <- function(chrls, pQls, pops, tChr = 2){
 	SSothers2 <- matrix(nrow= nps2, ncol= nps2)
 	for(i in 1:nps1){
 		selloc1 <- pps1[i,]
-		selloc2 <- pps2[i,]
 		SSothers1[i,] <- cor(t(ppsOth1[pSothX1,]), as.numeric(selloc1))^2
+	}
+	for(i in 1:nps2){
+		selloc2 <- pps2[i,]
 		SSothers2[i,] <- cor(t(ppsOth2[pSothX2,]), as.numeric(selloc2))^2
 	}
+	SSothers1 <- as.numeric(SSothers1)[seq(2, length(SSothers1)-nps1, 2)]
+	SSothers2 <- as.numeric(SSothers2)[seq(2, length(SSothers2)-nps2, 2)]
+
 	####    (s-n)
 	allNothers <- do.call("rbind", t.Neuter)
 	ppNothers <- getPPS(allNothers, specX1, specX1)
@@ -183,22 +190,28 @@ getQldPallChr <- function(chrls, pQls, pops, tChr = 2){
 	SNothers2 <- matrix(nrow= nps2, ncol= nps2)
 	for(i in 1:nps1){
 		selloc1 <- pps1[i,]
-		selloc2 <- pps2[i,]
 		SNothers1[i,] <- cor(t(ppNoth1[pNothX1,]), as.numeric(selloc1))^2
+	}
+	for(i in 1:nps2){
+		selloc2 <- pps2[i,]
 		SNothers2[i,] <- cor(t(ppNoth2[pNothX2,]), as.numeric(selloc2))^2
 	}
+	SNothers1 <- as.numeric(SNothers1)[seq(2, length(SNothers1)-nps1, 2)]
+	SNothers2 <- as.numeric(SNothers2)[seq(2, length(SNothers2)-nps2, 2)]
 	####    (n-n)  
 	NNothers1 <- matrix(nrow= nps1, ncol= nps1)
 	NNothers2 <- matrix(nrow= nps2, ncol= nps2)
 	for(i in 1:nps1){
 		neutloc1 <- pN1[i,]
-		neutloc2 <- pN2[i,]
 		NNothers1[i,] <- cor(t(ppNoth1[pNothX1,]), as.numeric(neutloc1))^2
+	}
+	for(i in 1:nps2){
+		neutloc2 <- pN2[i,]
 		NNothers2[i,] <- cor(t(ppNoth2[pNothX2,]), as.numeric(neutloc2))^2
 	}
+	NNothers1 <- as.numeric(NNothers1)[seq(2, length(NNothers1)-nps1, 2)]
+	NNothers2 <- as.numeric(NNothers2)[seq(2, length(NNothers2)-nps2, 2)]
 	####
-	#spec1list <- list(LDmat1[upper.tri(LDmat1)], LDmatN1[upper.tri(LDmatN1)], mSN1[upper.tri(mSN1)], SSothers1[upper.tri(SSothers1)], SNothers1[upper.tri(SNothers1)], NNothers1[upper.tri(NNothers1)])
-	#spec2list <- list(LDmat2[upper.tri(LDmat2)], LDmatN2[upper.tri(LDmatN2)], mSN2[upper.tri(mSN2)], SSothers2[upper.tri(SSothers2)], SNothers2[upper.tri(SNothers2)], NNothers2[upper.tri(NNothers2)])
 
 	spec1list <- list(LDmat1[upper.tri(LDmat1)], LDmatN1[upper.tri(LDmatN1)], mSN1, SSothers1, SNothers1, NNothers1)
 	names(spec1list) <- c("LDmat", "LDmatN", "mSN", "SSothers", "SNothers", "NNothers")
