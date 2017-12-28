@@ -376,7 +376,7 @@ for(i in 1:3){
 ####     per locus fst 
 
 
-sfst <- system("ls pgStats/fst/singleLoc/", intern= T)
+lsfst <- system("ls pgStats/fst/singleLoc/", intern= T)
 fls.fst <- lsfst[grep("weir.fst", lsfst)]#[c(1:14, 16)]
 
 
@@ -468,6 +468,10 @@ for(i in 1:3){
 
 p_fst_outN <- cbind(pOutM[,1], fstOutM[,1])
 colnames(p_fst_outN) <- c('afDiffs', 'Fst')
+
+
+
+
 #
 getQld2 <- function(x, g, pops, n= 0.05){
 	spec1 <- pops[1]
@@ -966,7 +970,7 @@ error.bar(barFst, fstM, fstSD) #1.96*cs$dpSD/10)
 
 ## Dxy
 
-divObj <- divW10k
+divObj <- divW1k
 
 dxy_cgal_mros <- lapply(divObj, '[[', 9)
 meanSd1 <- list(unlist(lapply(dxy_cgal_mros, mean, na.rm= T)), unlist(lapply(dxy_cgal_mros, sd, na.rm= T)))
@@ -979,22 +983,32 @@ meanSd3 <- list(unlist(lapply(dxy_cgal_pach, mean, na.rm= T)), unlist(lapply(dxy
 
 dxyL <- list(meanSd1, meanSd2, meanSd3) 
 
-dxyM <- matrix(nrow= 5, ncol= 3, dimnames= list(chromnames, c('cgal_mros', 'pach_mros', 'cgal_pach')))
-dxySD <- matrix(nrow= 5, ncol= 3, dimnames= list(chromnames, c('cgal_mros', 'pach_mros', 'cgal_pach')))
+dxyM <- matrix(nrow= 5, ncol= 6, dimnames= list(chromnames, paste0(c("cgmrMean", "cgmrSD", "pamrMean", "pamrSD", "cgpaMean", "cgpaSD"), '_Dxy')))
+#dxySD <- matrix(nrow= 5, ncol= 3, dimnames= list(chromnames, c('cgal_mros', 'pach_mros', 'cgal_pach')))
 
 for(i in 1:3){
 	#for(j in 1:5){
-		dxyM[,i] <- dxyL[[i]][[1]]
-		dxySD[,i] <- dxyL[[i]][[2]]
+	j <- i*2
+		dxyM[,j-1] <- dxyL[[i]][[1]]
+		dxyM[,j] <- dxyL[[i]][[2]]
 }
 
-barDxy <- barplot(dxyM, beside= T, col= brewer.pal(5, 'Set3'), ylim= c(0, 1), xlab= 'species*chroms', ylab= expression(D[XY]), cex.names= 1.4, cex.axis= 1.4)
-legend('topright', legend= chromnames, fill= brewer.pal(5, 'Set3'))
-error.bar(barDxy, dxyM, dxySD) #1.96*cs$dpSD/10)
+
+###
+#for(i in 1:3){
+#	j <- i*2
+#	tajDM[,j-1] <- mean_tajD[,i]
+#	tajDM[,j] <- sd_tajD[,i]
+#}
+#
+#
+#barDxy <- barplot(dxyM, beside= T, col= brewer.pal(5, 'Set3'), ylim= c(0, 1), xlab= 'species*chroms', ylab= expression(D[XY]), cex.names= 1.4, cex.axis= 1.4)
+#legend('topright', legend= chromnames, fill= brewer.pal(5, 'Set3'))
+#error.bar(barDxy, dxyM, dxySD) #1.96*cs$dpSD/10)
 
 ## pi
 
-divObj <- divW10k
+divObj <- divW1k
 
 pi_cgal <- lapply(divObj, '[[', 6)
 meanSd1 <- list(unlist(lapply(pi_cgal, mean, na.rm= T)), unlist(lapply(pi_cgal, sd, na.rm= T)))
@@ -1007,13 +1021,14 @@ meanSd3 <- list(unlist(lapply(pi_pach, mean, na.rm= T)), unlist(lapply(pi_pach, 
 
 piL <- list(meanSd1, meanSd2, meanSd3) 
 
-piM <- matrix(nrow= 5, ncol= 3, dimnames= list(chromnames, c('cgal', 'mros', 'pach')))
-piSD <- matrix(nrow= 5, ncol= 3, dimnames= list(chromnames, c('cgal', 'mros', 'pach')))
+piM <- matrix(nrow= 5, ncol= 6, dimnames= list(chromnames, paste0(c("cgMean", "cgSD", "mrMean", "mrSD", "paMean", "paSD"), '_pi')))
+#piSD <- matrix(nrow= 5, ncol= 3, dimnames= list(chromnames, c('cgal', 'mros', 'pach')))
 
 for(i in 1:3){
 	#for(j in 1:5){
-		piM[,i] <- piL[[i]][[1]]
-		piSD[,i] <- piL[[i]][[2]]
+	j <- i*2
+	piM[,j-1] <- piL[[i]][[1]]
+	piM[,j] <- piL[[i]][[2]]
 }
 
 barPi <- barplot(piM, beside= T, col= brewer.pal(5, 'Set3'), ylim= c(0, 1), xlab= 'species*chroms', ylab= expression(pi), cex.names= 1.4, cex.axis= 1.4)
