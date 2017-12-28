@@ -251,9 +251,9 @@ getQldPallChrSub <- function(chrls, pQls, pops, tChr = 2, subN= 5000){
 	selXX <- selX[[specPairX]]
 	#
 	pps <- getPPS(gChr[selXX,], specX1, specX2)
-	if(length(pps[[1]]) > subN){
-		pps1 <- pps[[1]][sample(nrow(pps1), subN, replace= F),]
-		pps2 <- pps[[2]][sample(nrow(pps2), subN, replace= F),]
+	if(dim(pps[[1]])[1] > subN){
+		pps1 <- pps[[1]][sample(nrow(pps[[1]]), subN, replace= F),]
+		pps2 <- pps[[2]][sample(nrow(pps[[2]]), subN, replace= F),]
 	}
 	else{
 		pps1 <- pps[[1]]
