@@ -366,6 +366,152 @@ getQldPallChrSub <- function(chrls, pQls, pops, tChr = 2, subN= 5000){
 	return(LDlist)
 }
 
+getDistsPallChrSub <- function(chrls, pQls, pops, tbPosls, Chr = 2, subN= 5000){
+	## get r^2 values of mean genotypes for outliers (s) and neutral sites (n) between the two given taxa, for:
+	## 1) s-s, n-n, and s-n within chromosome (tChr)
+	## 2) s-s, n-n, and s-n between tChr and all other chromosomes
+	## output is a list of lists with length(list) == length(pops) and the resp. comparisons within each of these two lists (length = 6) 
+	spec1 <- pops[1]
+	spec2 <- pops[2]
+	specs <- c(rep('cgal', 10), rep('mros', 10), rep('pach', 10))
+	indXs <- c(1:10, 11:20, 21:30)
+	specX1 <- which(specs == spec1)
+	specX2 <- which(specs == spec2)
+	chromnum <- c(2, 7, 10, 18, 21)
+	chromnames <- paste('chr', chromnum, sep= '')
+	chrX <- which(chromnum == tChr)
+	gChr <- chrls[[chrX]]
+	# s 
+	selX <- pQls[[chrX]]							#getPquant(pDiff, qtt)#[[1]]
+	ppairs <- names(selX)
+	specPairX <- which(ppairs == paste(pops[1], pops[2], sep= '_'))
+	selXX <- selX[[specPairX]]
+	#
+	pps <- getPPS(gChr[selXX,], specX1, specX2)
+	# selXX, ixN1, ixN2
+	
+
+
+#	if(dim(pps[[1]])[1] > subN){
+#		ixN1 <- sample(nrow(pps[[1]]), subN, replace= F)
+#		ixN2 <- sample(nrow(pps[[2]]), subN, replace= F)
+#		pps1 <- pps[[1]][ixN1,]
+#		pps2 <- pps[[2]][ixN2,]
+#	}
+#	else{ 
+#		ixN1 <- 
+#		ixN2 <- 
+#		pps1 <- pps[[1]]
+#		pps2 <- pps[[2]]
+#	}
+#	#
+#
+#	#LDmat1 <- cor(t(pps1))^2
+#	#LDmat2 <- cor(t(pps2))^2
+#	# n
+#	nps1 <- dim(pps1)[1]	#dim(LDmat1)[1]
+#	nps2 <- dim(pps2)[1]	#dim(LDmat2)[1]
+#	pn <- gChr[-selXX,]
+#	iNvar1 <- which(apply(pn[,specX1], 1, sd) == 0)
+#	iNvar2 <- which(apply(pn[,specX2], 1, sd) == 0)
+#	ppn1 <- pn[-iNvar1, specX1]
+#	ppn2 <- pn[-iNvar2, specX2]
+#	snx1 <- sample(nrow(ppn1), nps1, replace= F)
+#	snx2 <- sample(nrow(ppn2), nps2, replace= F)
+#
+#	pN1 <- ppn1[snx1,]
+#	pN2 <- ppn2[snx2,]
+#	LDmatN1 <- cor(t(pN1))^2
+#	LDmatN2 <- cor(t(pN2))^2
+#	
+#	### s - n 
+#	mSN1 <- matrix(nrow= nps1, ncol= nps1)
+#	mSN2 <- matrix(nrow= nps2, ncol= nps2)
+#	for(i in 1:nps1){
+#		selloc1 <- pps1[i,]
+#		mSN1[i,] <- cor(t(pN1), as.numeric(selloc1))^2
+#	}
+#	for(i in 1:nps2){
+#	  	selloc2 <- pps2[i,]
+#		mSN2[i,] <- cor(t(pN2), as.numeric(selloc2))^2
+#	}
+#	mSN1 <- as.numeric(mSN1)[seq(2, length(mSN1)-nps1, 2)]
+#	mSN2 <- as.numeric(mSN2)[seq(2, length(mSN2)-nps2, 2)]
+#	#### diff chroms (s-s)
+#	gChrOthers <- chrl[-chrX]
+#	pQchrXs <- pQls[-chrX]		# indices for all "other" chroms, with all 3 specPairs
+#	pQchrOthers <- lapply(pQchrXs, '[[', specPairX)		# list of indices for afDiff outliers per Chromosome, for the resp. pop-pair
+#	names(pQchrOthers) <- names(chrl[-chrX])
+#	t.Seleck <- list()
+#	t.Neuter <- list()
+#	for(i in 1:length(pQchrOthers)){
+#		t.Seleck[[i]] <- gChrOthers[[i]][pQchrOthers[[i]],]
+#		t.Neuter[[i]] <- gChrOthers[[i]][-pQchrOthers[[i]],]
+#	}
+#	allSothers <- do.call("rbind", t.Seleck)
+#	ppsOthers <- getPPS(allSothers, specX1, specX2)
+#	ppsOth1 <- ppsOthers[[1]]
+#	ppsOth2 <- ppsOthers[[2]]
+#	pSothX1 <- sample(nrow(ppsOth1), nps1, replace= F)
+#	pSothX2 <- sample(nrow(ppsOth2), nps2, replace= F)
+#
+#	SSothers1 <- matrix(nrow= nps1, ncol= nps1)
+#	SSothers2 <- matrix(nrow= nps2, ncol= nps2)
+#	for(i in 1:nps1){
+#		selloc1 <- pps1[i,]
+#		SSothers1[i,] <- cor(t(ppsOth1[pSothX1,]), as.numeric(selloc1))^2
+#	}
+#	for(i in 1:nps2){
+#		selloc2 <- pps2[i,]
+#		SSothers2[i,] <- cor(t(ppsOth2[pSothX2,]), as.numeric(selloc2))^2
+#	}
+#	SSothers1 <- as.numeric(SSothers1)[seq(2, length(SSothers1)-nps1, 2)]
+#	SSothers2 <- as.numeric(SSothers2)[seq(2, length(SSothers2)-nps2, 2)]
+#
+#	####    (s-n)
+#	allNothers <- do.call("rbind", t.Neuter)
+#	ppNothers <- getPPS(allNothers, specX1, specX1)
+#	ppNoth1 <- ppNothers[[1]]
+#	ppNoth2 <- ppNothers[[2]]
+#	pNothX1 <- sample(nrow(ppNoth1), nps1, replace= F)
+#	pNothX2 <- sample(nrow(ppNoth2), nps2, replace= F)
+#	#
+#	SNothers1 <- matrix(nrow= nps1, ncol= nps1)
+#	SNothers2 <- matrix(nrow= nps2, ncol= nps2)
+#	for(i in 1:nps1){
+#		selloc1 <- pps1[i,]
+#		SNothers1[i,] <- cor(t(ppNoth1[pNothX1,]), as.numeric(selloc1))^2
+#	}
+#	for(i in 1:nps2){
+#		selloc2 <- pps2[i,]
+#		SNothers2[i,] <- cor(t(ppNoth2[pNothX2,]), as.numeric(selloc2))^2
+#	}
+#	SNothers1 <- as.numeric(SNothers1)[seq(2, length(SNothers1)-nps1, 2)]
+#	SNothers2 <- as.numeric(SNothers2)[seq(2, length(SNothers2)-nps2, 2)]
+#	####    (n-n)  
+#	NNothers1 <- matrix(nrow= nps1, ncol= nps1)
+#	NNothers2 <- matrix(nrow= nps2, ncol= nps2)
+#	for(i in 1:nps1){
+#		neutloc1 <- pN1[i,]
+#		NNothers1[i,] <- cor(t(ppNoth1[pNothX1,]), as.numeric(neutloc1))^2
+#	}
+#	for(i in 1:nps2){
+#		neutloc2 <- pN2[i,]
+#		NNothers2[i,] <- cor(t(ppNoth2[pNothX2,]), as.numeric(neutloc2))^2
+#	}
+#	NNothers1 <- as.numeric(NNothers1)[seq(2, length(NNothers1)-nps1, 2)]
+#	NNothers2 <- as.numeric(NNothers2)[seq(2, length(NNothers2)-nps2, 2)]
+#	####
+#
+#	spec1list <- list(LDmat1[upper.tri(LDmat1)], LDmatN1[upper.tri(LDmatN1)], mSN1, SSothers1, SNothers1, NNothers1)
+#	names(spec1list) <- c("LDmat", "LDmatN", "mSN", "SSothers", "SNothers", "NNothers")
+#	spec2list <- list(LDmat2[upper.tri(LDmat2)], LDmatN2[upper.tri(LDmatN2)], mSN2, SSothers2, SNothers2, NNothers2)
+#	names(spec2list) <- names(spec1list)
+#	LDlist <- list(spec1list, spec2list)
+#	names(LDlist) <- pops
+#	return(LDlist)
+#}
+
 
 getSubQldPallChrSub <- function(chrls, pQls, pops, tChr = 2, subN= 5000){
 	## get r^2 values of mean genotypes for outliers (s) and neutral sites (n) between the two given taxa, for:
