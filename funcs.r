@@ -74,11 +74,12 @@ is.integer0 <- function(x){
 }
 
 getVarSites <- function(ps, siteIX, specX1, specX2){
+	## This function takes as input the genotype data.frame of loci by individuals, a vector of indices of target loci within said df (or NULL, if not supplying those), and the two respective indices for individuals.
+	## OUTPUT is a list of 2 lists, with 1) the 2 subset dfs with all variable loci (sd != 0), respectively, and 2) the indices of those remaining loci (meant to be used in the getQr* functions)
+
 	if(!is.null(siteIX)){
 		ps <- ps[siteIX,]
-		
 	}
-
 	invar1 <- which(apply(ps[,specX1], 1, sd) == 0)
 	invar2 <- which(apply(ps[,specX2], 1, sd) == 0)
 	if(is.integer0(invar1) && is.integer0(invar2)){
@@ -109,7 +110,7 @@ getVarSites <- function(ps, siteIX, specX1, specX2){
 }
 
 
-getQldallChrSub <- function(chrls, pQls, pops, tChr = 2, subN= 5000){
+getQr_allChrSub <- function(chrls, pQls, pops, tChr = 2, subN= 5000){
 	## get r^2 values of mean genotypes for outliers (s) and neutral sites (n) between the two given taxa, for:
 	## 1) s-s, n-n, and s-n within chromosome (tChr)
 	## 2) s-s, n-n, and s-n between tChr and all other chromosomes
@@ -257,10 +258,11 @@ getQldallChrSub <- function(chrls, pQls, pops, tChr = 2, subN= 5000){
 	return(LDlist)
 }
 
-getDistIXsn <- function(chrls, pQls, pops, bPosls, tChr = 2, subN= 5000){
-	## get r^2 values of mean genotypes  and their respective distances for outliers (s) and neutral sites (n) between the two given taxa, for:
-	## 1) s-s, and n-n within chromosome (tChr)
-	## output is a list of lists with length(list) == length(pops) and the resp. comparisons within each of these two lists (length = 6) 
+getQrDistIXsn <- function(chrls, pQls, pops, bPosls, tChr = 2, subN= 5000){
+	## get r^2 values of mean genotypes  and their respective distances for outliers (s) and neutral sites (n) between the two given taxa
+	## NOTE: only for the s, n, and s-n within the given chromosome (tChr)
+	## 1) s-s, and n-n within chromosome (tChr) and distance matrices for the respective loci 
+	## output is a list of lists with length(list) == length(pops) and the resp. comparisons within each of these two lists (length = 4) 
 	spec1 <- pops[1]
 	spec2 <- pops[2]
 	specs <- c(rep('cgal', 10), rep('mros', 10), rep('pach', 10))
@@ -348,8 +350,9 @@ getDistIXsn <- function(chrls, pQls, pops, bPosls, tChr = 2, subN= 5000){
 
 getSubQld <- function(chrls, pQls, pops, tChr = 2, subN= 5000){
 	## get r^2 values of mean genotypes for outliers (s) and neutral sites (n) between the two given taxa, for:
+	## NOTE: only for s, n, and s-n within the given chromosome (tChr)
 	## s-s, n-n, and s-n within chromosome (tChr)
-	## output is a list of lists with length(list) == length(pops) and the resp. comparisons within each of these two lists (length = 6) 
+	## output is a list of lists with length(list) == length(pops) and the resp. comparisons within each of these two lists (length = 3) 
 	spec1 <- pops[1]
 	spec2 <- pops[2]
 	specs <- c(rep('cgal', 10), rep('mros', 10), rep('pach', 10))
