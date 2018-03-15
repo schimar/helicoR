@@ -50,6 +50,19 @@ getPquant <- function(pDiff, quantil = 0.98){
 	return(quantPls)
 }
 
+getFstGLquant <- function(pFst, quantil = 0.98){
+	# get the indices for outliers given xth quantile 
+	#dat <- abs(pFst)
+	quantPls <- list()
+	for(i in 1:length(pFst)){
+		quant <- quantile(pFst[[i]], prob= quantil, type= 8, na.rm= T)
+		quantPls[[i]] <- which(pFst[[i]] > quant)
+	}
+	names(quantPls) <- c('cgal_mros', 'pach_mros', 'cgal_pach')
+	return(quantPls)
+}
+
+
 
 getFquant <- function(fst, quantil = 0.98){
 	quantFls <- list()
